@@ -32,13 +32,11 @@ func addCar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate the request
 	if newCar.Model == "" || newCar.Registration == "" || newCar.Mileage < 0 {
 		http.Error(w, "Invalid request. Make sure all fields are provided and mileage is non-negative.", http.StatusBadRequest)
 		return
 	}
 
-	// Check if the car already exists by registration number
 	for _, car := range cars {
 		if car.Registration == newCar.Registration {
 			http.Error(w, "Car with the same registration number already exists", http.StatusConflict)
@@ -46,7 +44,6 @@ func addCar(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Save the new car to the MySQL database
 	_, err = db.Exec("INSERT INTO cars (model, registration, mileage, is_rented) VALUES (?, ?, ?, ?)",
 		newCar.Model, newCar.Registration, newCar.Mileage, newCar.IsRented)
 	if err != nil {
@@ -55,7 +52,6 @@ func addCar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Add the new car to your in-memory slice
 	cars = append(cars, newCar)
 
 	w.WriteHeader(http.StatusCreated)
@@ -65,7 +61,6 @@ func rentCar(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	registration := params["registration"]
 
-	// Find the car with the given registration number
 	for i, car := range cars {
 		if car.Registration == registration {
 			if car.IsRented {
@@ -85,7 +80,6 @@ func returnCar(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	registration := params["registration"]
 
-	// Find the car with the given registration number
 	for i, car := range cars {
 		if car.Registration == registration {
 			if !car.IsRented {
@@ -93,7 +87,6 @@ func returnCar(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Simulate updating mileage and marking the car as available
 			cars[i].Mileage += 100
 			cars[i].IsRented = false
 
